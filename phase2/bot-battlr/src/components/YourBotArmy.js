@@ -12,6 +12,8 @@ const BotCollection = ({ enlistBot }) => {
     fetchData();
   }, []);
 
+  
+
   return (
     <div className="bot-collection">
       {bots.map((bot) => (
