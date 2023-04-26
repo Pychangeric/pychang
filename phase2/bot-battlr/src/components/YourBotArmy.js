@@ -1,50 +1,39 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function YourBotArmy() {
-  const [botArmy, setBotArmy] = useState([]);
+const BotCollection = ({ enlistBot }) => {
+  const [bots, setBots] = useState([]);
 
   useEffect(() => {
-    // Fetch data from the server
-    fetch('http://localhost:3000/bots?enlisted=true')
-      .then(response => response.json())
-      .then(data => setBotArmy(data));
+    const fetchData = async () => {
+      const result = await axios.get('http://localhost:3000/bots');
+      setBots(result.data);
+    };
+    fetchData();
   }, []);
 
-  const releaseBot = (botId) => {
-    // Remove the bot from the bot army
-    const updatedArmy = botArmy.filter(bot => bot.id !== botId);
-    setBotArmy(updatedArmy);
-
-    // Mark the bot as not enlisted in the database
-    fetch(`http://localhost:3000/bots/${botId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        enlisted: false
-      })
-    });
-  };
-
-  const renderBotArmy = () => {
-    if (botArmy.length > 0) {
-      return botArmy.map(bot => (
-        <div key={bot.id}>
-          <h3>{bot.name}</h3>
-          <button onClick={() => releaseBot(bot.id)}>Release</button>
-        </div>
-      ));
-    } else {
-      return <p>Your bot army is empty.</p>;
-    }
-  };
-
   return (
-    <div>
-      {renderBotArmy()}
+    <div className="bot-collection">
+      {bots.map((bot) => (
+        <div key={bot.id} className="bot-card">
+          <div className="bot-card__image-container">
+            <img src={bot.image_url} alt={bot.name} />
+          </div>
+          <div className="bot-card__details">
+            <h2>{bot.name}</h2>
+            <p>Weapon: {bot.weapon}</p>
+            <p>Special Ability: {bot.special_ability}</p>
+            <button
+              onClick={() => enlistBot(bot)}
+              disabled={bot.enlisted}
+            >
+              {bot.enlisted ? 'Enlisted' : 'Enlist'}
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
-}
+};
 
-export default YourBotArmy;
+export default BotCollection;
